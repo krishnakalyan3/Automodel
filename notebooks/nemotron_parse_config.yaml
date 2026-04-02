@@ -44,7 +44,7 @@ processor:
 
 checkpoint:
   enabled: true
-  checkpoint_dir: vlm_checkpoints/
+  checkpoint_dir: nemotron_parse_checkpoints/
   model_save_format: safetensors
   save_consolidated: true
 
