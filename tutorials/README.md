@@ -3,5 +3,4 @@
 
 | Tutorial | Type | Brev Instance | Launch on Brev |
 | --- | --- | --- | --- |
-| [**Nemotron Parse fine-tune**](https://github.com/NVIDIA-NeMo/Automodel/blob/main/tutorials/nemotron-parse/finetune.ipynb) | Fine-tuning | L40S | [Launch on Brev](https://brev.nvidia.com/launchable/deploy?launchableID=env-3AlK7Hv098E95npBgX5JYCOquRX) |
-
+| [**Nemotron Parse fine-tune**](https://github.com/NVIDIA-NeMo/Automodel/blob/main/tutorials/nemotron-parse/finetune.ipynb) | Fine-tuning | L40S | [![Launch on Brev](https://brev-assets.s3.us-west-1.amazonaws.com/nv-lb-dark.svg)](https://brev.nvidia.com/launchable/deploy?launchableID=env-3AlK7Hv098E95npBgX5JYCOquRX) |

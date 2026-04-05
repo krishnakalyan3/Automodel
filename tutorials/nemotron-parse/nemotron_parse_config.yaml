@@ -14,9 +14,9 @@
 
 
 step_scheduler:
-  global_batch_size: 32
-  local_batch_size: 4
-  ckpt_every_steps: 100
+  global_batch_size: 4
+  local_batch_size: 1
+  ckpt_every_steps: 10
   val_every_steps: 100  # will run every x number of gradient steps
   max_steps: 1000
 
