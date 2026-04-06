@@ -16,9 +16,9 @@
 step_scheduler:
   global_batch_size: 4
   local_batch_size: 1
-  ckpt_every_steps: 10
-  val_every_steps: 100  # will run every x number of gradient steps
-  max_steps: 1000
+  ckpt_every_steps: 100
+  val_every_steps: 100
+  max_steps: 600
 
 dist_env:
   backend: nccl
@@ -33,8 +33,6 @@ model:
   _target_: nemo_automodel.NeMoAutoModelForImageTextToText.from_pretrained
   pretrained_model_name_or_path: nvidia/NVIDIA-Nemotron-Parse-v1.1
   torch_dtype: torch.bfloat16
-  use_liger_kernel: false
-  attn_implementation: eager
   trust_remote_code: True
 
 processor:
@@ -53,21 +51,25 @@ distributed:
   dp_size: none
   tp_size: 1
   cp_size: 1
-
   sequence_parallel: false
 
 loss_fn:
   _target_: nemo_automodel.components.models.nemotron_parse.nemotron_parse_loss.NemotronParseLoss
-  coordinate_weight: 10.0  # Weight multiplier for coordinate tokens
-  class_token_start_idx: 50000  # Threshold for coordinate tokens
+  coordinate_weight: 10.0
+  class_token_start_idx: 50000
   num_heads: 1
   ignore_index: -100
   fp32_upcast: true
 
 dataset:
-  _target_: nemo_automodel.components.datasets.vlm.datasets.make_cord_v2_dataset
-  path_or_dataset: naver-clova-ix/cord-v2
+  _target_: invoice_dataset.py:make_invoice_dataset
+  path_or_dataset: katanaml-org/invoices-donut-data-v1
   split: train
+
+validation_dataset:
+  _target_: invoice_dataset.py:make_invoice_dataset
+  path_or_dataset: katanaml-org/invoices-donut-data-v1
+  split: validation
 
 dataloader:
   _target_: torchdata.stateful_dataloader.StatefulDataLoader
@@ -76,24 +78,14 @@ dataloader:
   collate_fn:
     _target_: nemo_automodel.components.datasets.vlm.collate_fns.nemotron_parse_collate_fn
 
-validation_dataset:
-  _target_: nemo_automodel.components.datasets.vlm.datasets.make_cord_v2_dataset
-  path_or_dataset: naver-clova-ix/cord-v2
-  split: validation
-
 validation_dataloader:
   _target_: torchdata.stateful_dataloader.StatefulDataLoader
   
 optimizer:
   _target_: torch.optim.AdamW
-  lr: 7e-5
-  weight_decay: 0.1
+  lr: 2e-5
+  weight_decay: 0.01
   betas: [0.9, 0.999]
-
-lr_scheduler:
-  lr_decay_style: cosine
-  lr_warmup_steps: 50
-  min_lr: 1.0e-6
 
 freeze_config:
   freeze_embeddings: true
