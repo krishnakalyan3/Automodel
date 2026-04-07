@@ -13,18 +13,12 @@
 # limitations under the License.
 
 
-# To run this recipe:
-#   automodel examples/vlm_finetune/nemotron/nemotron_parse_v1_1.yaml --nproc-per-node 8
-# Adjust --nproc-per-node to the number of GPUs available on your machine.
-
-recipe: FinetuneRecipeForVLM
-
 step_scheduler:
-  global_batch_size: 16
-  local_batch_size: 2
-  ckpt_every_steps: 100
-  val_every_steps: 100  # will run every x number of gradient steps
-  max_steps: 1000
+  global_batch_size: 8
+  local_batch_size: 1
+  ckpt_every_steps: 25
+  val_every_steps: 25
+  max_steps: 50
 
 dist_env:
   backend: nccl
@@ -39,8 +33,6 @@ model:
   _target_: nemo_automodel.NeMoAutoModelForImageTextToText.from_pretrained
   pretrained_model_name_or_path: nvidia/NVIDIA-Nemotron-Parse-v1.1
   torch_dtype: torch.bfloat16
-  use_liger_kernel: false
-  attn_implementation: eager
   trust_remote_code: True
 
 processor:
@@ -50,7 +42,7 @@ processor:
 
 checkpoint:
   enabled: true
-  checkpoint_dir: vlm_checkpoints/
+  checkpoint_dir: nemotron_parse_checkpoints/
   model_save_format: safetensors
   save_consolidated: true
 
@@ -59,21 +51,25 @@ distributed:
   dp_size: none
   tp_size: 1
   cp_size: 1
-
   sequence_parallel: false
 
 loss_fn:
   _target_: nemo_automodel.components.models.nemotron_parse.nemotron_parse_loss.NemotronParseLoss
-  coordinate_weight: 10.0  # Weight multiplier for coordinate tokens
-  class_token_start_idx: 50000  # Threshold for coordinate tokens
+  coordinate_weight: 10.0
+  class_token_start_idx: 50000
   num_heads: 1
   ignore_index: -100
   fp32_upcast: true
 
 dataset:
-  _target_: nemo_automodel.components.datasets.vlm.datasets.make_cord_v2_dataset
-  path_or_dataset: naver-clova-ix/cord-v2
+  _target_: invoice_dataset.py:make_invoice_dataset
+  path_or_dataset: katanaml-org/invoices-donut-data-v1
   split: train
+
+validation_dataset:
+  _target_: invoice_dataset.py:make_invoice_dataset
+  path_or_dataset: katanaml-org/invoices-donut-data-v1
+  split: validation
 
 dataloader:
   _target_: torchdata.stateful_dataloader.StatefulDataLoader
@@ -82,29 +78,16 @@ dataloader:
   collate_fn:
     _target_: nemo_automodel.components.datasets.vlm.collate_fns.nemotron_parse_collate_fn
 
-validation_dataset:
-  _target_: nemo_automodel.components.datasets.vlm.datasets.make_cord_v2_dataset
-  path_or_dataset: naver-clova-ix/cord-v2
-  split: validation
-
 validation_dataloader:
   _target_: torchdata.stateful_dataloader.StatefulDataLoader
   
 optimizer:
   _target_: torch.optim.AdamW
-  lr: 1e-5
+  lr: 5e-5
   weight_decay: 0.01
-  betas: [0.9, 0.95]
+  betas: [0.9, 0.999]
 
 freeze_config:
   freeze_embeddings: true
   freeze_vision_tower: true
   freeze_language_model: false
-  
-# wandb:
-#   project: <your_project_name>  
-#   entity: <your_entity_name>
-#   name: <your_experiment_name>
-
-ci:
-  time: "00:30:00"
