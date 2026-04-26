@@ -17,7 +17,9 @@ End-to-end tutorials covering the LLM customization lifecycle using
 - [NeMo AutoModel](https://github.com/NVIDIA-NeMo/Automodel) installed
   (see the AutoModel README for setup instructions).
 - NVIDIA GPU(s) with sufficient memory (specific requirements noted per tutorial).
-- Hugging Face account and API token for gated models (e.g., Llama).
+- [Hugging Face](https://huggingface.co/) account and API token for gated models (e.g., Llama).
+- Access to tutorial data from the [Hugging Face Datasets Hub](https://huggingface.co/datasets)
+  or your own local JSONL/bin-idx datasets, depending on the tutorial.
 
 ## Pipeline Overview
 
